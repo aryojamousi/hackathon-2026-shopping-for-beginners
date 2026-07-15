@@ -1,0 +1,117 @@
+<header class="tm-header">
+    {# Top bar: logo, trust badges, links, locale #}
+    <div class="tm-topbar">
+        <div class="tm-topbar__inner">
+            <a href="{{ path('app_home') }}" class="tm-logo" aria-label="Thomann Startseite">
+                <img src="https://images.static-thomann.de/pics/images/logos/thomann-cyan-white.svg" alt="Thomann" width="130" height="28">
+            </a>
+
+            <ul class="tm-topbar__badges">
+                <li>3 Jahre Garantie</li>
+                <li>
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6">
+                        <polygon points="12 2 15 9 22 9.5 16.5 14.5 18 22 12 18 6 22 7.5 14.5 2 9.5 9 9"></polygon>
+                    </svg>
+                    Zufriedenheitsgarantie
+                </li>
+            </ul>
+
+            <ul class="tm-topbar__links">
+                <li><a href="#">Kontakt</a></li>
+                <li><a href="#">Über uns</a></li>
+                <li>
+                    <a href="#" class="tm-topbar__locale">
+                        <span class="tm-topbar__flag">🇩🇪</span> DE / €
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    {# Main row: shop/service dropdowns, search, account icons #}
+    <div class="tm-header-main">
+        <div class="tm-header-main__inner">
+            <nav class="tm-main-nav" aria-label="Hauptnavigation">
+                <details class="tm-dropdown">
+                    <summary>
+                        Shop
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </summary>
+                    <div class="tm-dropdown__panel">
+                        <ul class="tm-dropdown__list">
+                            <li><a href="#">Gitarren &amp; Bässe</a></li>
+                            <li><a href="#">Drums &amp; Percussion</a></li>
+                            <li><a href="#">Tasteninstrumente</a></li>
+                            <li><a href="#">Studio &amp; Recording</a></li>
+                            <li><a href="#">Software</a></li>
+                            <li><a href="#">PA &amp; Beschallung</a></li>
+                            <li><a href="#">Licht &amp; Bühne</a></li>
+                            <li><a href="#">DJ-Equipment</a></li>
+                            <li><a href="#">Mikrofone</a></li>
+                            <li><a href="#">Blasinstrumente</a></li>
+                            <li><a href="#">Noten &amp; Bücher</a></li>
+                            <li><a href="#">Zubehör &amp; Kopfhörer</a></li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="tm-dropdown">
+                    <summary>
+                        Service
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </summary>
+                    <div class="tm-dropdown__panel">
+                        <ul class="tm-dropdown__list">
+                            <li><a href="#">Versandkosten &amp; Lieferzeiten</a></li>
+                            <li><a href="#">Hilfe-Center</a></li>
+                            <li><a href="#">Gutscheine</a></li>
+                            <li><a href="#">Kontakt</a></li>
+                            <li><a href="#">Ladengeschäft</a></li>
+                            <li><a href="#">Service im Überblick</a></li>
+                        </ul>
+                    </div>
+                </details>
+            </nav>
+
+            <form class="tm-search" role="search" action="#" method="get">
+                <input type="search" class="tm-search__input" placeholder="Wonach suchen Sie?" aria-label="Suche">
+                <button type="submit" class="tm-search__button" aria-label="Suchen">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+            </form>
+
+            <div class="tm-header-actions">
+                <a href="#" class="tm-header-actions__item" aria-label="Mein Konto">
+                    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span class="tm-header-actions__dot"></span>
+                </a>
+                <a href="#" class="tm-header-actions__item" aria-label="Wunschliste">
+                    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path>
+                    </svg>
+                    <span class="tm-header-actions__dot"></span>
+                </a>
+                <a href="#" class="tm-header-actions__item" aria-label="Warenkorb">
+                    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
