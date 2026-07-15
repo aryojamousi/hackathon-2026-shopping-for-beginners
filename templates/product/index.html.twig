@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Produkte{% endblock %}
+
+{% block body %}
+    <div class="tm-content-placeholder">
+        <h1 class="tm-product-heading">Produkte (DBAL-Beispiel)</h1>
+
+        <div class="tm-product-grid">
+            {% for article in articles %}
+                <div class="tm-product-card">
+                    <p class="tm-product-card__brand">{{ article.brand }}</p>
+                    <p class="tm-product-card__name">{{ article.name }}</p>
+                    <p class="tm-product-card__manufacturer">{{ article.manufacturer }}</p>
+                    <p class="tm-product-card__price">{{ article.price|number_format(2, ',', '.') }} &euro;</p>
+                </div>
+            {% else %}
+                <p>Keine Artikel gefunden.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
