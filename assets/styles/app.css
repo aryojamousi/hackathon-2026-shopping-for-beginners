@@ -222,6 +222,26 @@ ul {
     color: var(--tm-primary-500);
 }
 
+.tm-header-help {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid var(--tm-neutral-300);
+    color: var(--tm-neutral-700);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.tm-header-help:hover {
+    border-color: var(--tm-primary-500);
+    color: var(--tm-primary-500);
+}
+
 .tm-header-actions {
     flex: 0 0 auto;
     display: flex;
