@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Instrument-Berater{% endblock %}
+
+{% block body %}
+    <div class="tm-content-placeholder">
+        <h1>Dein Einsteiger-Berater</h1>
+        <p>Erzähl uns kurz, was du vorhast — der Berater gibt dir Empfehlungen auf
+            Basis der Thomann-Ratgeber, Learn-Artikel und echten Produkten.</p>
+
+        {% if not configured %}
+            <p><strong>Hinweis:</strong> Der Berater ist noch nicht konfiguriert.
+                Setze <code>OPENROUTER_API_KEY</code> in <code>.env.local</code>, um
+                Empfehlungen zu erhalten.</p>
+        {% endif %}
+
+        {# data-turbo="false": Turbo rejects a 200 HTML response to a POST
+           ("Form responses must redirect to another location"). Opting this
+           form out lets the browser navigate normally and render the result. #}
+        <form method="post" action="{{ path('app_advisor_ask') }}" data-turbo="false">
+            <p>
+                <label>Wofür interessierst du dich?<br>
+                    <select name="category" required>
+                        {% for category in categories %}
+                            <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </p>
+            <p>
+                <label>Budget (EUR, optional)<br>
+                    <input type="number" name="budget" min="0" step="10" placeholder="z. B. 300">
+                </label>
+            </p>
+            <p>
+                <label>Erfahrung (optional)<br>
+                    <input type="text" name="experience" placeholder="z. B. kompletter Anfänger">
+                </label>
+            </p>
+            <p>
+                <label>Deine Frage<br>
+                    <textarea name="question" rows="3" cols="50" placeholder="Was brauche ich für den Einstieg?"></textarea>
+                </label>
+            </p>
+            <p><button type="submit">Beraten lassen</button></p>
+        </form>
+    </div>
+{% endblock %}

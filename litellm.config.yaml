@@ -1,0 +1,23 @@
+# LiteLLM proxy configuration for the instrument advisor (Path A).
+#
+# Exposes an Anthropic-compatible /v1/messages endpoint and routes it to a local
+# Ollama model, so the app's Anthropic PHP SDK works unchanged — only the base
+# URL and model name differ (see .env.local). Started via compose.ai.yaml.
+#
+# To use a different / smaller model, change the `model` below and pull it:
+#   docker compose -f compose.ai.yaml exec ollama ollama pull <model>
+
+model_list:
+  - model_name: local-advisor
+    litellm_params:
+      # ollama_chat/* uses Ollama's /api/chat endpoint (better for chat models).
+      # qwen2.5:0.5b fits Docker's default ~2 GiB. For much better advice, raise
+      # Docker/WSL2 memory to 8 GB+ and switch this to qwen2.5:7b (see README note).
+      model: ollama_chat/qwen2.5:0.5b
+      # Reaches the Ollama service on the shared compose network.
+      api_base: http://ollama:11434
+
+litellm_settings:
+  # Silently drop request params the Ollama backend doesn't understand
+  # (e.g. any Anthropic-specific fields) instead of erroring.
+  drop_params: true

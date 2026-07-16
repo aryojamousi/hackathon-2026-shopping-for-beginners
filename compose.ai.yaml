@@ -1,0 +1,52 @@
+# Optional local-LLM stack for the instrument advisor (Path A) — runs Ollama
+# and a LiteLLM proxy that speaks the Anthropic API, so no host installs and no
+# API key/billing are needed. This file is separate from compose.yaml so it's
+# opt-in; it does not affect the normal app stack.
+#
+# One-time setup:
+#   docker compose -f compose.ai.yaml up -d
+#   docker compose -f compose.ai.yaml exec ollama ollama pull qwen2.5:0.5b
+#
+# Then in .env.local:
+#   ANTHROPIC_API_KEY=ollama-local          # any non-empty value
+#   ANTHROPIC_BASE_URL=http://localhost:4000
+#   ANTHROPIC_MODEL=local-advisor
+#
+# Model size vs. memory: Docker Desktop defaults to ~2 GiB, which only fits the
+# small qwen2.5:0.5b (weak but functional advice). For much better quality, give
+# Docker/WSL2 more RAM — create %USERPROFILE%\.wslconfig with:
+#     [wsl2]
+#     memory=8GB
+# then `wsl --shutdown`, restart Docker, `... ollama pull qwen2.5:7b`, and set
+# `model: ollama_chat/qwen2.5:7b` in litellm.config.yaml (restart the litellm service).
+#
+# Stop with:  docker compose -f compose.ai.yaml down   (add -v to drop the model cache)
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    # For NVIDIA GPU acceleration, uncomment (requires the NVIDIA container toolkit):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    depends_on:
+      - ollama
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./litellm.config.yaml:/app/config.yaml:ro
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+
+volumes:
+  ollama_data:
