@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ category }} · Ratgeber{% endblock %}
+
+{% block body %}
+    <div class="tm-content-placeholder">
+        <p><a href="{{ path('app_guides') }}">&larr; Alle Ratgeber</a></p>
+        <h1>{{ category }}</h1>
+
+        <h2>Kaufberatung</h2>
+        <ul>
+            {% for guide in guides %}
+                <li><a href="{{ guide.url }}" target="_blank" rel="noopener">{{ guide.title }}</a></li>
+            {% else %}
+                <li>Keine Guides in dieser Kategorie.</li>
+            {% endfor %}
+        </ul>
+
+        <h2>Learn-Artikel</h2>
+        <ul>
+            {% for article in articles %}
+                <li>
+                    <a href="{{ article.url }}" target="_blank" rel="noopener">{{ article.title }}</a>
+                    {% if article.readingTime %}<small>· {{ article.readingTime }} min</small>{% endif %}
+                    {% if article.excerpt %}<br><small>{{ article.excerpt }}</small>{% endif %}
+                </li>
+            {% else %}
+                <li>Keine Artikel in dieser Kategorie.</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

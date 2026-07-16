@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ratgeber & Guides{% endblock %}
+
+{% block body %}
+    <div class="tm-content-placeholder">
+        <h1>Ratgeber & Guides</h1>
+        <p>Buying guides and learn articles crawled from Thomann, served from the
+            separate read-only SQLite connection.</p>
+
+        <h2>Kaufberatung (Online Expert)</h2>
+        {% for category, guides in guidesByCategory %}
+            <section>
+                <h3>
+                    <a href="{{ path('app_guides_category', { category: category }) }}">{{ category }}</a>
+                    {% if articleCounts[category] is defined %}
+                        <small>· {{ articleCounts[category] }} Learn-Artikel</small>
+                    {% endif %}
+                </h3>
+                <ul>
+                    {% for guide in guides %}
+                        <li>
+                            <a href="{{ guide.url }}" target="_blank" rel="noopener">{{ guide.title }}</a>
+                            {% if guide.description %}— {{ guide.description }}{% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% else %}
+            <p>Keine Guides gefunden.</p>
+        {% endfor %}
+
+        <h2>Neueste Learn-Artikel</h2>
+        <ul>
+            {% for article in latestArticles %}
+                <li>
+                    <a href="{{ article.url }}" target="_blank" rel="noopener">{{ article.title }}</a>
+                    <small>[{{ article.category }}]{% if article.readingTime %} · {{ article.readingTime }} min{% endif %}</small>
+                </li>
+            {% else %}
+                <p>Keine Artikel gefunden.</p>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
