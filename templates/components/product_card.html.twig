@@ -1,0 +1,162 @@
+{# Reusable product card component.
+
+   Data points are hard-coded via the default below for now; pass a `product`
+   variable with the same shape to override:
+     {{ include('components/product_card.html.twig', { product: {...} }) }}
+#}
+{% set product = product|default({
+    name: 'Harley Benton R-457MN WH Progressive Series',
+    url: 'https://www.thomann.de/de/harley_benton_r_457mn_wh_progressive_series.htm',
+    image: 'https://thumbs.static-thomann.de/thumb/thumb600x/pics/prod/419527.jpg',
+    price: '159 €',
+    rating: 4.5,
+    reviews: 151,
+    available: true,
+    availability_label: 'Sofort lieferbar',
+}) %}
+
+{% macro star(kind) %}
+    {% set fill = kind == 'full' ? '#1d1d1b' : (kind == 'half' ? 'url(#tmPcHalf)' : '#d5d5d5') %}
+    <svg class="tm-pc__star" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+        <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21l1.18-6.88-5-4.87 7.1-1.01z" fill="{{ fill }}"/>
+    </svg>
+{% endmacro %}
+
+{% macro stars(rating) %}
+    {% import _self as pc %}
+    {% set full = rating|round(0, 'floor') %}
+    {% set hasHalf = (rating - full) >= 0.5 %}
+    <span class="tm-pc__stars" role="img" aria-label="{{ rating }} von 5 Sternen">
+        {% for i in 1..5 %}
+            {%- if i <= full -%}{{ pc.star('full') }}
+            {%- elseif i == full + 1 and hasHalf -%}{{ pc.star('half') }}
+            {%- else -%}{{ pc.star('empty') }}{%- endif -%}
+        {% endfor %}
+    </span>
+{% endmacro %}
+
+{% import _self as pc %}
+
+<style>
+    .tm-product-card {
+        box-sizing: border-box;
+        width: 320px;
+        max-width: 100%;
+        padding: 20px 22px 24px;
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, .10);
+        font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+        color: #1d1d1b;
+    }
+    .tm-product-card * { box-sizing: border-box; }
+    .tm-pc__image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 240px;
+        padding: 8px 0 16px;
+    }
+    .tm-pc__image img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .tm-pc__divider { border: 0; border-top: 1px solid #ececec; margin: 0 0 16px; }
+    .tm-pc__title {
+        display: block;
+        text-align: center;
+        color: #6d4fc4;
+        text-decoration: none;
+        font-size: 1.05rem;
+        font-weight: 600;
+        line-height: 1.3;
+    }
+    .tm-pc__title:hover { text-decoration: underline; }
+    .tm-pc__rating {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin: 12px 0 6px;
+    }
+    .tm-pc__stars { display: inline-flex; gap: 1px; }
+    .tm-pc__star { display: block; }
+    .tm-pc__reviews { color: #6b6b6b; font-size: .9rem; }
+    .tm-pc__actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 6px 0 4px;
+    }
+    .tm-pc__price { font-size: 1.35rem; font-weight: 700; }
+    .tm-pc__icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px;
+        border: 0;
+        background: none;
+        color: #1d1d1b;
+        cursor: pointer;
+    }
+    .tm-pc__icon-btn:hover { color: #6d4fc4; }
+    .tm-pc__availability {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        margin-top: 12px;
+        color: #2a8a3e;
+        font-size: .92rem;
+    }
+    .tm-pc__dot { width: 9px; height: 9px; border-radius: 50%; background: #2a8a3e; }
+</style>
+
+{# Gradient used to render half-filled stars. #}
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <defs>
+        <linearGradient id="tmPcHalf">
+            <stop offset="50%" stop-color="#1d1d1b"/>
+            <stop offset="50%" stop-color="#d5d5d5"/>
+        </linearGradient>
+    </defs>
+</svg>
+
+<article class="tm-product-card">
+    <a class="tm-pc__image" href="{{ product.url }}">
+        <img src="{{ product.image }}" alt="{{ product.name }}" loading="lazy">
+    </a>
+
+    <hr class="tm-pc__divider">
+
+    <a class="tm-pc__title" href="{{ product.url }}">{{ product.name }}</a>
+
+    <div class="tm-pc__rating">
+        {{ pc.stars(product.rating) }}
+        <span class="tm-pc__reviews">{{ product.reviews }}</span>
+    </div>
+
+    <div class="tm-pc__actions">
+        <button type="button" class="tm-pc__icon-btn" aria-label="Zur Wunschliste hinzufügen">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+                 stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+        </button>
+
+        <span class="tm-pc__price">{{ product.price }}</span>
+
+        <button type="button" class="tm-pc__icon-btn" aria-label="In den Warenkorb">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+                 stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="9" cy="20" r="1.4"/>
+                <circle cx="18" cy="20" r="1.4"/>
+                <path d="M2 3h3l2.4 12.3a1.5 1.5 0 0 0 1.5 1.2h8.3a1.5 1.5 0 0 0 1.5-1.2L22 7H6"/>
+            </svg>
+        </button>
+    </div>
+
+    {% if product.available %}
+        <div class="tm-pc__availability">
+            <span class="tm-pc__dot"></span>
+            <span>{{ product.availability_label }}</span>
+        </div>
+    {% endif %}
+</article>
