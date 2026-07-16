@@ -121,7 +121,8 @@ def write_db(guides: list[dict]) -> None:
                 category    TEXT NOT NULL,
                 description TEXT,
                 image_url   TEXT,
-                source_url  TEXT NOT NULL
+                source_url  TEXT NOT NULL,
+                text        TEXT
             )
             """
         )

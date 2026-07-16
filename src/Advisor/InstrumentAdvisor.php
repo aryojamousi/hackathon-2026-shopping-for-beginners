@@ -12,20 +12,19 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 /**
  * Retrieval-augmented instrument-buying advisor.
  *
- * Retrieves the relevant slice of the Thomann catalogue (guides, Learn articles
- * and products) for a beginner's situation, hands it to an LLM as grounding
- * context, and returns friendly, cited advice. The model is instructed to
- * recommend only from the provided context so answers stay grounded in real
- * data rather than hallucinated products or prices.
+ * Retrieves the relevant slice of the Thomann catalogue (guides + full guide
+ * text, Learn articles, products) for a beginner's situation and asks the LLM
+ * for a structured answer: a Markdown summary plus the specific sources it used.
  *
- * Backend: OpenRouter's OpenAI-compatible chat-completions API, called directly
- * over HTTP (no SDK, no local proxy). Swap models via OPENROUTER_MODEL.
+ * The source lists are constrained to the retrieved candidates via JSON-Schema
+ * enums (the model can only pick real IDs/URLs), and validated again server-side.
+ *
+ * Backend: OpenRouter's OpenAI-compatible chat-completions API.
  */
 final class InstrumentAdvisor
 {
     /**
      * Keywords (English + German) used to shortlist products per category.
-     * Product names in the ncart catalogue are largely German.
      *
      * @var array<string, list<string>>
      */
@@ -44,6 +43,9 @@ final class InstrumentAdvisor
         'Wind & Brass' => ['saxophon', 'trompete', 'trumpet', 'flute'],
         'Orchestral Strings' => ['violin', 'geige', 'cello'],
     ];
+
+    private const MAX_GUIDE_TEXTS = 4;
+    private const GUIDE_TEXT_CHARS = 2500;
 
     public function __construct(
         private readonly GuideRepository $guides,
@@ -66,69 +68,197 @@ final class InstrumentAdvisor
     }
 
     /**
-     * Return grounded advice for the beginner's situation as a single string.
-     *
      * @throws AdvisorUnavailableException when no API key is configured
      */
-    public function adviseText(AdvisorRequest $request): string
+    public function advise(AdvisorRequest $request): AdvisorResult
     {
         if (!$this->isConfigured()) {
             throw new AdvisorUnavailableException('OPENROUTER_API_KEY is not set.');
         }
 
+        // --- Retrieve the candidate set (the only sources the model may cite) ---
+        $guideCatalogue = $this->guides->findAll();
+        $guideTexts = $this->guides->findByCategoryWithText($request->category);
+        $articles = $this->articles->findByCategory($request->category, 8);
+        $products = $this->fetchProducts($request);
+
+        $productIds = array_values(array_map(static fn (array $p): string => $p['artnr'], $products));
+        $guideUrls = array_values(array_map(static fn (array $g): string => $g['url'], $guideCatalogue));
+        $blogUrls = array_values(array_map(static fn (array $a): string => $a['url'], $articles));
+
+        // --- Ask for a structured answer constrained to those candidates ---
         $response = $this->httpClient->request('POST', rtrim($this->baseUrl, '/').'/chat/completions', [
             'auth_bearer' => $this->apiKey,
             'headers' => [
                 'Content-Type' => 'application/json',
-                // Optional OpenRouter attribution headers.
                 'X-Title' => 'Shopping for Beginners - Instrument Advisor',
             ],
             'json' => [
                 'model' => $this->model,
                 'max_tokens' => 2048,
                 'messages' => [
-                    ['role' => 'system', 'content' => $this->buildSystemPrompt()],
-                    ['role' => 'user', 'content' => $this->buildUserMessage($request)],
+                    // Scrub to valid UTF-8: catalogue data (esp. the external MySQL
+                    // product table) can carry stray bytes that break json_encode.
+                    ['role' => 'system', 'content' => mb_scrub($this->buildSystemPrompt($guideCatalogue))],
+                    ['role' => 'user', 'content' => mb_scrub($this->buildUserMessage($request, $guideTexts, $articles, $products))],
                 ],
+                'response_format' => [
+                    'type' => 'json_schema',
+                    'json_schema' => [
+                        'name' => 'instrument_advice',
+                        'strict' => true,
+                        'schema' => $this->jsonSchema($productIds, $guideUrls, $blogUrls),
+                    ],
+                ],
+                // Only route to providers/models that actually honour response_format.
+                'provider' => ['require_parameters' => true],
             ],
             'timeout' => 60,
         ]);
 
-        // toArray() throws on a non-2xx response; the controller catches it.
         $data = $response->toArray();
-        $text = $data['choices'][0]['message']['content'] ?? '';
+        $content = (string) ($data['choices'][0]['message']['content'] ?? '');
+        $parsed = json_decode($content, true);
 
-        return trim((string) $text);
+        if (!\is_array($parsed)) {
+            // Model didn't return JSON (e.g. a backend that ignored the schema).
+            $this->logger->warning('Advisor structured output was not valid JSON; using raw content as summary.');
+
+            return new AdvisorResult(summary: trim($content));
+        }
+
+        // --- Validate the model's selections against the candidate set ---
+        return new AdvisorResult(
+            summary: trim((string) ($parsed['summary'] ?? '')),
+            products: $this->pick($products, 'artnr', $parsed['product_ids'] ?? []),
+            guides: $this->pickColumns($guideCatalogue, 'url', $parsed['guide_urls'] ?? []),
+            articles: $this->pickColumns($articles, 'url', $parsed['blog_urls'] ?? []),
+        );
     }
 
-    private function buildSystemPrompt(): string
+    /**
+     * @param array<int, array<string, mixed>> $candidates
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function pick(array $candidates, string $key, mixed $selected): array
+    {
+        $chosen = \is_array($selected) ? array_flip(array_map('strval', $selected)) : [];
+
+        return array_values(array_filter(
+            $candidates,
+            static fn (array $c): bool => isset($chosen[(string) $c[$key]]),
+        ));
+    }
+
+    /**
+     * Like pick(), but returns only {title, url} for rendering.
+     *
+     * @param array<int, array<string, mixed>> $candidates
+     *
+     * @return array<int, array{title: string, url: string}>
+     */
+    private function pickColumns(array $candidates, string $key, mixed $selected): array
+    {
+        return array_map(
+            static fn (array $c): array => ['title' => (string) $c['title'], 'url' => (string) $c['url']],
+            $this->pick($candidates, $key, $selected),
+        );
+    }
+
+    /**
+     * @return array<int, array{artid: int, artnr: string, brand: string, name: string, price: float, manufacturer: ?string}>
+     */
+    private function fetchProducts(AdvisorRequest $request): array
+    {
+        try {
+            $keywords = self::PRODUCT_KEYWORDS[$request->category] ?? [];
+            $products = $this->products->searchByKeywords($keywords, $request->budget, 6);
+            if ([] === $products && [] !== $keywords) {
+                $products = $this->products->searchByKeywords([], $request->budget, 6);
+            }
+
+            return $products;
+        } catch (\Throwable $e) {
+            $this->logger->warning('Advisor product lookup failed: {msg}', ['msg' => $e->getMessage()]);
+
+            return [];
+        }
+    }
+
+    /**
+     * @param list<string> $productIds
+     * @param list<string> $guideUrls
+     * @param list<string> $blogUrls
+     *
+     * @return array<string, mixed>
+     */
+    private function jsonSchema(array $productIds, array $guideUrls, array $blogUrls): array
+    {
+        $enumArray = static function (array $enum, string $description): array {
+            $items = ['type' => 'string'];
+            if ([] !== $enum) {
+                $items['enum'] = array_values(array_unique($enum));
+            }
+
+            return ['type' => 'array', 'items' => $items, 'description' => $description];
+        };
+
+        return [
+            'type' => 'object',
+            'additionalProperties' => false,
+            'required' => ['summary', 'product_ids', 'guide_urls', 'blog_urls'],
+            'properties' => [
+                'summary' => [
+                    'type' => 'string',
+                    'description' => 'Friendly, beginner-focused advice, formatted as Markdown.',
+                ],
+                'product_ids' => $enumArray($productIds, 'Article numbers of products you recommend. Choose only from the provided shortlist; [] if none apply.'),
+                'guide_urls' => $enumArray($guideUrls, 'URLs of buying guides you reference. Choose only from the provided list; [] if none.'),
+                'blog_urls' => $enumArray($blogUrls, 'URLs of Learn articles you reference. Choose only from the provided list; [] if none.'),
+            ],
+        ];
+    }
+
+    /**
+     * @param array<int, array{id: int, slug: string, title: string, url: string, category: string, description: string, imageUrl: string}> $guideCatalogue
+     */
+    private function buildSystemPrompt(array $guideCatalogue): string
     {
         $persona = <<<'TXT'
             You are Thomann's friendly instrument-buying guide for absolute beginners.
             You help new musicians choose their first instrument and gear with warm,
             plain-language advice - never condescending, never jargon-heavy.
 
+            You return a structured answer:
+            - `summary`: the advice itself, as Markdown. A short reassuring intro, then
+              concrete recommendations, then a "read next" nudge.
+            - `product_ids`, `guide_urls`, `blog_urls`: the specific sources you actually
+              used or recommend, chosen ONLY from the lists in the user message.
+
             Rules:
-            - Recommend ONLY products, guides and articles from the context the user
-              message provides. Never invent products, prices, brands or links.
-            - When you reference a guide, article or product, include its link.
-            - Respect the stated budget. If nothing in the shortlist fits, say so
-              honestly and suggest what to prioritise instead.
-            - Keep it concise and skimmable: a short reassuring intro, then concrete
-              recommendations, then one or two "read next" links from the guides.
-            - If the product shortlist is empty, still give solid advice from the
-              guides and articles and explain what to look for when browsing.
+            - Recommend ONLY products, guides and articles that appear in the provided
+              lists. Never invent products, prices, brands, IDs or links.
+            - Respect the stated budget. If nothing fits, say so and explain what to
+              prioritise instead (and leave product_ids empty).
+            - Every source you name in the summary must also appear in the matching
+              array, and vice versa.
             TXT;
 
-        $lines = ['Available buying guides (Thomann Online Expert):'];
-        foreach ($this->guides->findAll() as $guide) {
+        $lines = ['Full guide catalogue (you may cite any of these by URL):'];
+        foreach ($guideCatalogue as $guide) {
             $lines[] = sprintf('- [%s] %s: %s', $guide['category'], $guide['title'], $guide['url']);
         }
 
         return $persona."\n\n".implode("\n", $lines);
     }
 
-    private function buildUserMessage(AdvisorRequest $request): string
+    /**
+     * @param array<int, array{title: string, url: string, text: string}> $guideTexts
+     * @param array<int, array{title: string, url: string, tags: list<string>, excerpt: string, ...}> $articles
+     * @param array<int, array{artnr: string, brand: string, name: string, price: float, manufacturer: ?string, ...}> $products
+     */
+    private function buildUserMessage(AdvisorRequest $request, array $guideTexts, array $articles, array $products): string
     {
         $parts = [];
 
@@ -142,58 +272,42 @@ final class InstrumentAdvisor
         }
         $parts[] = '- Their question: '.($request->question ?: 'What should I buy to get started?');
 
-        $parts[] = "\n".$this->relevantArticles($request->category);
-        $parts[] = "\n".$this->productShortlist($request);
-        $parts[] = "\nUsing only the guides, articles and products above, give this beginner your advice.";
+        if ([] !== $guideTexts) {
+            $blocks = [];
+            foreach (\array_slice($guideTexts, 0, self::MAX_GUIDE_TEXTS) as $guide) {
+                $text = $guide['text'];
+                if (mb_strlen($text) > self::GUIDE_TEXT_CHARS) {
+                    $text = mb_substr($text, 0, self::GUIDE_TEXT_CHARS).'…';
+                }
+                $blocks[] = sprintf("### %s (%s)\n%s", $guide['title'], $guide['url'], $text);
+            }
+            $parts[] = "\nGuide reference material — cite by URL:\n".implode("\n\n", $blocks);
+        }
+
+        if ([] !== $articles) {
+            $lines = ['Learn articles — cite by URL:'];
+            foreach ($articles as $article) {
+                $tags = $article['tags'] ? ' — tags: '.implode(', ', \array_slice($article['tags'], 0, 5)) : '';
+                $lines[] = sprintf('- %s | %s%s', $article['url'], $article['title'], $tags);
+            }
+            $parts[] = "\n".implode("\n", $lines);
+        }
+
+        if ([] !== $products) {
+            $lines = ['Product shortlist — cite by article number:'];
+            foreach ($products as $p) {
+                $brand = $p['manufacturer'] ?: $p['brand'];
+                $lines[] = sprintf('- %s | %s %s | %.2f EUR', $p['artnr'], $brand, $p['name'], $p['price']);
+            }
+            $parts[] = "\n".implode("\n", $lines);
+        } else {
+            $parts[] = "\nProduct shortlist: (none available — advise from guides/articles and leave product_ids empty)";
+        }
+
+        $parts[] = "\nWrite `summary` as friendly Markdown advice. In product_ids, guide_urls and "
+            .'blog_urls include ONLY identifiers from the lists above that you actually recommend '
+            .'or reference. Use [] for any list where nothing applies.';
 
         return implode("\n", $parts);
-    }
-
-    private function relevantArticles(string $category): string
-    {
-        $articles = $this->articles->findByCategory($category, 8);
-        if ([] === $articles) {
-            return 'Relevant Learn articles: (none for this category)';
-        }
-
-        $lines = ['Relevant Learn articles:'];
-        foreach ($articles as $article) {
-            $tags = $article['tags'] ? ' - tags: '.implode(', ', \array_slice($article['tags'], 0, 5)) : '';
-            $lines[] = sprintf('- %s: %s%s', $article['title'], $article['url'], $tags);
-        }
-
-        return implode("\n", $lines);
-    }
-
-    private function productShortlist(AdvisorRequest $request): string
-    {
-        try {
-            $keywords = self::PRODUCT_KEYWORDS[$request->category] ?? [];
-            $products = $this->products->searchByKeywords($keywords, $request->budget, 6);
-            if ([] === $products && [] !== $keywords) {
-                $products = $this->products->searchByKeywords([], $request->budget, 6);
-            }
-        } catch (\Throwable $e) {
-            $this->logger->warning('Advisor product lookup failed: {msg}', ['msg' => $e->getMessage()]);
-            $products = [];
-        }
-
-        if ([] === $products) {
-            return 'Product shortlist: (unavailable - advise from guides/articles and describe what to look for)';
-        }
-
-        $lines = ['Product shortlist (real Thomann catalogue):'];
-        foreach ($products as $p) {
-            $brand = $p['manufacturer'] ?: $p['brand'];
-            $lines[] = sprintf(
-                '- %s %s - %.2f EUR (https://www.thomann.de/intl/%s.htm)',
-                $brand,
-                $p['name'],
-                $p['price'],
-                $p['artnr'],
-            );
-        }
-
-        return implode("\n", $lines);
     }
 }

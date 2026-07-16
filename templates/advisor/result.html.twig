@@ -10,8 +10,40 @@
         {% if error %}
             <p><strong>{{ error }}</strong></p>
         {% else %}
-            {# advice is sanitized HTML from CommonMark (raw HTML escaped upstream) #}
-            <div class="tm-advice">{{ advice|raw }}</div>
+            {# summary is sanitized HTML from CommonMark (raw HTML escaped upstream) #}
+            <div class="tm-advice">{{ summary|raw }}</div>
+
+            {% if products is not empty %}
+                <h2>Empfohlene Produkte</h2>
+                <ul class="tm-sources tm-sources--products">
+                    {% for p in products %}
+                        <li>
+                            <a href="https://www.thomann.de/intl/{{ p.artnr }}.htm" target="_blank" rel="noopener">
+                                {{ p.manufacturer ?: p.brand }} {{ p.name }}
+                            </a>
+                            — {{ p.price|number_format(2, ',', '.') }} &euro;
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if guides is not empty %}
+                <h2>Passende Ratgeber</h2>
+                <ul class="tm-sources tm-sources--guides">
+                    {% for g in guides %}
+                        <li><a href="{{ g.url }}" target="_blank" rel="noopener">{{ g.title }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if articles is not empty %}
+                <h2>Weiterlesen</h2>
+                <ul class="tm-sources tm-sources--articles">
+                    {% for a in articles %}
+                        <li><a href="{{ a.url }}" target="_blank" rel="noopener">{{ a.title }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
         {% endif %}
     </div>
 {% endblock %}

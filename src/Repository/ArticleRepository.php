@@ -98,13 +98,15 @@ class ArticleRepository
      */
     private function hydrate(array $rows): array
     {
+        // Scrub to valid UTF-8: the ncart table can carry stray bytes that
+        // break json_encode (LLM requests) and Twig rendering.
         return array_map(static fn (array $row): array => [
             'artid' => (int) $row['artid'],
             'artnr' => (string) $row['artnr'],
-            'brand' => (string) $row['brand'],
-            'name' => (string) $row['name'],
+            'brand' => mb_scrub((string) $row['brand']),
+            'name' => mb_scrub((string) $row['name']),
             'price' => (float) $row['price'],
-            'manufacturer' => $row['manufacturer'],
+            'manufacturer' => null !== $row['manufacturer'] ? mb_scrub((string) $row['manufacturer']) : null,
         ], $rows);
     }
 }

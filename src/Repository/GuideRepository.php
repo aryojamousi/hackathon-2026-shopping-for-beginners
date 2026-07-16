@@ -49,6 +49,32 @@ class GuideRepository
     }
 
     /**
+     * Guides in a category that have crawled article text, including that text.
+     * Kept separate from the listing queries so the large `text` blobs are only
+     * loaded when actually needed (i.e. for the advisor's grounding context).
+     *
+     * @return array<int, array{title: string, url: string, text: string}>
+     */
+    public function findByCategoryWithText(string $category): array
+    {
+        $rows = $this->connection->createQueryBuilder()
+            ->select('g.title AS title', 'g.url AS url', 'g.text AS text')
+            ->from('guides', 'g')
+            ->where('g.category = :category')
+            ->andWhere("g.text IS NOT NULL AND g.text <> ''")
+            ->orderBy('g.title', 'ASC')
+            ->setParameter('category', $category)
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        return array_map(static fn (array $row): array => [
+            'title' => (string) $row['title'],
+            'url' => (string) $row['url'],
+            'text' => (string) ($row['text'] ?? ''),
+        ], $rows);
+    }
+
+    /**
      * Guides grouped by their instrument/topic category.
      *
      * @return array<string, array<int, array{id: int, slug: string, title: string, url: string, category: string, description: string, imageUrl: string}>>

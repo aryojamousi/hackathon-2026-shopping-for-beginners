@@ -40,11 +40,10 @@ class AdvisorController extends AbstractController
             return $this->render('advisor/unavailable.html.twig');
         }
 
-        $advice = null;
+        $result = null;
         $error = null;
         try {
-            // The model replies in Markdown; render it to safe HTML for display.
-            $advice = $this->renderMarkdown($advisor->adviseText($advisorRequest));
+            $result = $advisor->advise($advisorRequest);
         } catch (AdvisorUnavailableException) {
             return $this->render('advisor/unavailable.html.twig');
         } catch (\Throwable $e) {
@@ -54,7 +53,11 @@ class AdvisorController extends AbstractController
 
         return $this->render('advisor/result.html.twig', [
             'category' => $advisorRequest->category,
-            'advice' => $advice,
+            // The model's summary is Markdown; render it to safe HTML.
+            'summary' => $result ? $this->renderMarkdown($result->summary) : null,
+            'products' => $result->products ?? [],
+            'guides' => $result->guides ?? [],
+            'articles' => $result->articles ?? [],
             'error' => $error,
         ]);
     }
