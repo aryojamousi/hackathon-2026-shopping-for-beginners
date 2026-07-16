@@ -18,7 +18,7 @@
                 <ul class="tm-sources tm-sources--products">
                     {% for p in products %}
                         <li>
-                            <a href="https://www.thomann.de/intl/{{ p.artnr }}.htm" target="_blank" rel="noopener">
+                            <a href="https://www.thomann.de/intl/{{ p.fname }}.htm" target="_blank" rel="noopener">
                                 {{ p.manufacturer ?: p.brand }} {{ p.name }}
                             </a>
                             — {{ p.price|number_format(2, ',', '.') }} &euro;

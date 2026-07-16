@@ -16,7 +16,7 @@ class ArticleRepository
     }
 
     /**
-     * @return array<int, array{artid: int, artnr: string, brand: string, name: string, price: float, manufacturer: ?string}>
+     * @return array<int, array{artid: int, artnr: string, fname: string, brand: string, name: string, price: float, manufacturer: ?string}>
      */
     public function findFeatured(int $limit = 12): array
     {
@@ -24,6 +24,7 @@ class ArticleRepository
             ->select(
                 'a.art_artid AS artid',
                 'a.art_artnr AS artnr',
+                'a.art_fname AS fname',
                 'a.art_name1 AS brand',
                 'a.art_name2 AS name',
                 'a.art_verka AS price',
@@ -50,7 +51,7 @@ class ArticleRepository
      *
      * @param list<string> $keywords
      *
-     * @return array<int, array{artid: int, artnr: string, brand: string, name: string, price: float, manufacturer: ?string}>
+     * @return array<int, array{artid: int, artnr: string, fname: string, brand: string, name: string, price: float, manufacturer: ?string}>
      */
     public function searchByKeywords(array $keywords, ?int $maxPrice = null, int $limit = 6): array
     {
@@ -58,6 +59,7 @@ class ArticleRepository
             ->select(
                 'a.art_artid AS artid',
                 'a.art_artnr AS artnr',
+                'a.art_fname AS fname',
                 'a.art_name1 AS brand',
                 'a.art_name2 AS name',
                 'a.art_verka AS price',
@@ -94,7 +96,7 @@ class ArticleRepository
     /**
      * @param array<int, array<string, mixed>> $rows
      *
-     * @return array<int, array{artid: int, artnr: string, brand: string, name: string, price: float, manufacturer: ?string}>
+     * @return array<int, array{artid: int, artnr: string, fname: string, brand: string, name: string, price: float, manufacturer: ?string}>
      */
     private function hydrate(array $rows): array
     {
@@ -103,6 +105,7 @@ class ArticleRepository
         return array_map(static fn (array $row): array => [
             'artid' => (int) $row['artid'],
             'artnr' => (string) $row['artnr'],
+            'fname' => mb_scrub((string) $row['fname']),
             'brand' => mb_scrub((string) $row['brand']),
             'name' => mb_scrub((string) $row['name']),
             'price' => (float) $row['price'],

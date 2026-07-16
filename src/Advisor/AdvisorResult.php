@@ -9,7 +9,7 @@ namespace App\Advisor;
 final class AdvisorResult
 {
     /**
-     * @param array<int, array{artid: int, artnr: string, brand: string, name: string, price: float, manufacturer: ?string}> $products
+     * @param array<int, array{artid: int, artnr: string, fname: string, brand: string, name: string, price: float, manufacturer: ?string}> $products
      * @param array<int, array{title: string, url: string}> $guides
      * @param array<int, array{title: string, url: string}> $articles
      */
