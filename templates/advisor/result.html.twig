@@ -10,7 +10,8 @@
         {% if error %}
             <p><strong>{{ error }}</strong></p>
         {% else %}
-            <div class="tm-advice">{{ advice|nl2br }}</div>
+            {# advice is sanitized HTML from CommonMark (raw HTML escaped upstream) #}
+            <div class="tm-advice">{{ advice|raw }}</div>
         {% endif %}
     </div>
 {% endblock %}

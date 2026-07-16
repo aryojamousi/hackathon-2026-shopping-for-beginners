@@ -6,6 +6,7 @@ use App\Advisor\AdvisorRequest;
 use App\Advisor\AdvisorUnavailableException;
 use App\Advisor\InstrumentAdvisor;
 use App\Repository\GuideRepository;
+use League\CommonMark\GithubFlavoredMarkdownConverter;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -42,7 +43,8 @@ class AdvisorController extends AbstractController
         $advice = null;
         $error = null;
         try {
-            $advice = $advisor->adviseText($advisorRequest);
+            // The model replies in Markdown; render it to safe HTML for display.
+            $advice = $this->renderMarkdown($advisor->adviseText($advisorRequest));
         } catch (AdvisorUnavailableException) {
             return $this->render('advisor/unavailable.html.twig');
         } catch (\Throwable $e) {
@@ -55,5 +57,19 @@ class AdvisorController extends AbstractController
             'advice' => $advice,
             'error' => $error,
         ]);
+    }
+
+    /**
+     * Convert the model's Markdown reply to sanitized HTML: raw HTML in the
+     * Markdown is escaped and unsafe link schemes (javascript:, etc.) are stripped.
+     */
+    private function renderMarkdown(string $markdown): string
+    {
+        $converter = new GithubFlavoredMarkdownConverter([
+            'html_input' => 'escape',
+            'allow_unsafe_links' => false,
+        ]);
+
+        return $converter->convert($markdown)->getContent();
     }
 }
