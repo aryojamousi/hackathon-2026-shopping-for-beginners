@@ -1,11 +1,11 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Beratung · {{ category }}{% endblock %}
+{% block title %}Advice · {{ category }}{% endblock %}
 
 {% block body %}
     <div class="tm-content-placeholder">
-        <p><a href="{{ path('app_advisor') }}">&larr; Neue Frage</a></p>
-        <h1>Beratung für: {{ category }}</h1>
+        <p><a href="{{ path('app_advisor') }}">&larr; New question</a></p>
+        <h1>Advice for: {{ category }}</h1>
 
         {% if error %}
             <p><strong>{{ error }}</strong></p>

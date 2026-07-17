@@ -48,7 +48,7 @@ class AdvisorController extends AbstractController
             return $this->render('advisor/unavailable.html.twig');
         } catch (\Throwable $e) {
             $logger->error('Advisor request failed: {msg}', ['msg' => $e->getMessage(), 'exception' => $e]);
-            $error = 'Der Berater konnte gerade keine Antwort erzeugen. Bitte versuche es erneut.';
+            $error = 'The advisor could not generate an answer right now. Please try again.';
         }
 
         return $this->render('advisor/result.html.twig', [

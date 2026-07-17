@@ -1,12 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Berater nicht konfiguriert{% endblock %}
+{% block title %}Advisor not configured{% endblock %}
 
 {% block body %}
     <div class="tm-content-placeholder">
-        <h1>Berater nicht konfiguriert</h1>
-        <p>Der Instrument-Berater benötigt einen OpenRouter-API-Schlüssel. Setze
-            <code>OPENROUTER_API_KEY</code> in <code>.env.local</code> und lade neu.</p>
-        <p><a href="{{ path('app_advisor') }}">&larr; Zurück</a></p>
+        <h1>Advisor not configured</h1>
+        <p>The instrument advisor requires an OpenRouter API key. Set
+            <code>OPENROUTER_API_KEY</code> in <code>.env.local</code> and reload.</p>
+        <p><a href="{{ path('app_advisor') }}">&larr; Back</a></p>
     </div>
 {% endblock %}

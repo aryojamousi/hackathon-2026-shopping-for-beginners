@@ -1,10 +1,238 @@
-<!DOCTYPE html>
-<html lang="de">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Für Einsteiger</title>
-    </head>
-    <body>
-    </body>
-</html>
+{% extends 'base.html.twig' %}
+
+{% block title %}For Beginners{% endblock %}
+
+{% block body %}
+    <div class="tm-content-placeholder">
+        <div class="tm-quiz-wrap" data-controller="beginner-questionnaire">
+            {# Step stage — rendered by the Stimulus controller #}
+            <div data-beginner-questionnaire-target="stage"></div>
+
+            {# Results — revealed once the questionnaire is finished #}
+            <div class="tm-quiz-results" data-beginner-questionnaire-target="results" hidden>
+                <header class="tm-results-header">
+                    <h1 class="tm-results-header__title">Great! Here are your results. 🎉</h1>
+                </header>
+
+                {# Answer summary — populated by the questionnaire controller #}
+                <div class="tm-quiz__crumbs tm-results-summary">
+                    <span class="tm-results-summary__chips" data-beginner-questionnaire-target="summary"></span>
+                    <button type="button" class="tm-quiz__restart" data-action="beginner-questionnaire#restart">
+                        Restart questionnaire
+                    </button>
+                </div>
+
+                <div class="tm-rec-grid">
+                    {% for article in articles %}
+                        <div class="tm-rec-card{{ article.highlight is defined and article.highlight ? ' tm-rec-card--highlight' : '' }}">
+                            <div class="tm-rec-card__image">
+                                {% if article.image is defined and article.image %}
+                                    <img src="{{ article.image }}" alt="{{ article.brand }} {{ article.name }}" loading="lazy">
+                                {% else %}
+                                    <span class="tm-rec-card__image-placeholder">[ Product image ]</span>
+                                {% endif %}
+                            </div>
+
+                            {% if article.badge is defined and article.badge %}
+                                <span class="tm-rec-card__badge{{ article.highlight is defined and article.highlight ? ' tm-rec-card__badge--highlight' : '' }}">
+                                    {{ article.badge }}
+                                </span>
+                            {% endif %}
+
+                            <h3 class="tm-rec-card__title">{{ article.brand }} {{ article.name }}</h3>
+
+                            <div class="tm-rec-card__reviews">
+                                <span class="tm-rec-card__stars" aria-hidden="true">
+                                    {% for i in 1..5 %}
+                                        <svg class="tm-rec-card__star{{ i <= (article.rating ?? 0) ? ' tm-rec-card__star--on' : '' }}"
+                                             viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                            <polygon points="12 2 15 9 22 9.5 16.5 14.5 18 22 12 18 6 22 7.5 14.5 2 9.5 9 9"></polygon>
+                                        </svg>
+                                    {% endfor %}
+                                </span>
+                                <span class="tm-rec-card__review-count">
+                                    {% if (article.reviews ?? 0) > 0 %}({{ article.reviews }}){% else %}No reviews yet{% endif %}
+                                </span>
+                            </div>
+
+                            <div class="tm-rec-card__actions">
+                                <button type="button" class="tm-rec-card__fav" aria-label="Add to wish list">
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path>
+                                    </svg>
+                                </button>
+                                <span class="tm-rec-card__price">{{ article.price|number_format(0, '.', ',') }}&nbsp;&euro;</span>
+                                <button type="button" class="tm-rec-card__cart" aria-label="Add to cart">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <circle cx="9" cy="21" r="1"></circle>
+                                        <circle cx="20" cy="21" r="1"></circle>
+                                        <path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {% if article.stockLabel is defined and article.stockLabel %}
+                                <p class="tm-rec-card__stock tm-rec-card__stock--{{ article.stockStatus ?? 'in' }}">
+                                    <span class="tm-rec-card__stock-dot" aria-hidden="true"></span>
+                                    {{ article.stockLabel }}
+                                </p>
+                            {% endif %}
+
+                            <div class="tm-rec-card__why" data-controller="why-dialog">
+                                <button type="button" class="tm-why-btn" data-action="why-dialog#open">
+                                    Why this?
+                                </button>
+                                <dialog class="tm-why-dialog" data-why-dialog-target="dialog"
+                                        data-action="click->why-dialog#backdrop">
+                                    <button type="button" class="tm-why-dialog__close"
+                                            data-action="why-dialog#close" aria-label="Close">
+                                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                    </button>
+                                    <div class="tm-why-dialog__content">
+                                        <p><strong>{{ article.whyName }}</strong>: {{ article.whyText }}</p>
+
+                                        <h3 class="tm-why-set__heading">Why a complete set?</h3>
+                                        <div class="tm-why-set">
+                                            <p class="tm-why-set__intro">
+                                                An electric guitar is almost silent on its own. It needs an amplifier
+                                                (the speaker box that creates the sound — including that distorted rock
+                                                sound) and a cable to connect the two. Plus a few small helpers.
+                                            </p>
+                                            <ul class="tm-why-set__list">
+                                                <li><strong>Electric guitar (full size):</strong> At 12–15, teenagers are big enough for a full-size guitar — it will last for years, no upgrade needed as they grow.</li>
+                                                <li><strong>Amplifier ("amp"):</strong> Makes the guitar audible — and creates the crunchy, distorted sound rock and metal are famous for.</li>
+                                                <li><strong>Cable:</strong> Connects the guitar to the amp.</li>
+                                                <li><strong>Clip-on tuner:</strong> Shows whether the strings are in tune. Important for beginners: a guitar in tune sounds good — and sounding good keeps motivation high.</li>
+                                                <li><strong>Picks:</strong> Small plastic triangles used to strike the strings. The standard way to play rock.</li>
+                                                <li><strong>Strap:</strong> For playing while standing — like a real rock star.</li>
+                                                <li><strong>Gig bag:</strong> A padded carry bag to store the guitar and bring it to lessons.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </dialog>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p>No articles found.</p>
+                    {% endfor %}
+                </div>
+
+                {# Accessories slider #}
+                <section class="tm-slider" data-controller="accessory-slider">
+                    <h2 class="tm-slider__heading">Alternative accessories</h2>
+
+                    <div class="tm-slider__viewport">
+                        <button type="button" class="tm-slider__arrow tm-slider__arrow--prev"
+                                data-action="accessory-slider#prev" aria-label="Previous">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+
+                        <div class="tm-slider__track" data-accessory-slider-target="track">
+                            {% for acc in accessories %}
+                                <div class="tm-acc-card">
+                                    <div class="tm-acc-card__image">
+                                        {% if acc.image is defined and acc.image %}
+                                            <img src="{{ acc.image }}" alt="{{ acc.name }}" loading="lazy">
+                                        {% else %}
+                                            <span class="tm-acc-card__image-placeholder">[ Product image ]</span>
+                                        {% endif %}
+                                    </div>
+                                    <h3 class="tm-acc-card__title">{{ acc.name }}</h3>
+                                    <div class="tm-acc-card__actions">
+                                        <button type="button" class="tm-acc-card__icon" aria-label="Add to wish list">
+                                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6">
+                                                <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path>
+                                            </svg>
+                                        </button>
+                                        <span class="tm-acc-card__price">{{ acc.price|number_format(2, ',', '.') }} &euro;</span>
+                                        <button type="button" class="tm-acc-card__icon" aria-label="Add to cart">
+                                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6">
+                                                <circle cx="9" cy="21" r="1"></circle>
+                                                <circle cx="20" cy="21" r="1"></circle>
+                                                <path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <button type="button" class="tm-slider__arrow tm-slider__arrow--next"
+                                data-action="accessory-slider#next" aria-label="Next">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="tm-slider__dots" data-accessory-slider-target="dots" aria-hidden="true"></div>
+                </section>
+
+                {# Useful content #}
+                <section class="tm-useful">
+                    <h2 class="tm-useful__heading">Useful content on our page</h2>
+                    <div class="tm-useful__list">
+                        {% for item in usefulContent %}
+                            <a href="{{ item.url }}" class="tm-useful__row">
+                                <span class="tm-useful__tag">{{ item.type }}</span>
+                                <span class="tm-useful__body">
+                                    <span class="tm-useful__title">{{ item.title }}</span>
+                                    <span class="tm-useful__text">{{ item.description }}</span>
+                                </span>
+                                <span class="tm-useful__arrow" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        <polyline points="12 5 19 12 12 19"></polyline>
+                                    </svg>
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                {# Talk to an expert #}
+                <section class="tm-expert">
+                    <h2 class="tm-expert__heading">Still unsure? Talk to our guitar experts</h2>
+                    <div class="tm-expert__card">
+                        <div class="tm-expert__avatar" aria-hidden="true"></div>
+                        <div class="tm-expert__info">
+                            <p class="tm-expert__name">Customer service — Guitar department</p>
+                            <p class="tm-expert__contact">
+                                <span class="tm-expert__contact-item">
+                                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 11.5a16 16 0 0 0 6 6l1.1-1.2a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"></path>
+                                    </svg>
+                                    +49 9546 9223-20
+                                </span>
+                                <span class="tm-expert__contact-item">
+                                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                        <polyline points="2 6 12 13 22 6"></polyline>
+                                    </svg>
+                                    gitarre@thomann.de
+                                </span>
+                            </p>
+                            <p class="tm-expert__hours">Mon–Fri 9:00–18:00 · Sat 9:30–16:00 · Advice in English &amp; German</p>
+                        </div>
+                        <a href="#" class="tm-expert__button">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                            </svg>
+                            Chat with our guitar experts
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                        </a>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock %}

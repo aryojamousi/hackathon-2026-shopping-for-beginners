@@ -1,17 +1,17 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Instrument-Berater{% endblock %}
+{% block title %}Instrument Advisor{% endblock %}
 
 {% block body %}
     <div class="tm-content-placeholder">
-        <h1>Dein Einsteiger-Berater</h1>
-        <p>Erzähl uns kurz, was du vorhast — der Berater gibt dir Empfehlungen auf
-            Basis der Thomann-Ratgeber, Learn-Artikel und echten Produkten.</p>
+        <h1>Your Beginner Advisor</h1>
+        <p>Tell us briefly what you have in mind — the advisor gives you recommendations
+            based on Thomann's guides, Learn articles, and real products.</p>
 
         {% if not configured %}
-            <p><strong>Hinweis:</strong> Der Berater ist noch nicht konfiguriert.
-                Setze <code>OPENROUTER_API_KEY</code> in <code>.env.local</code>, um
-                Empfehlungen zu erhalten.</p>
+            <p><strong>Note:</strong> The advisor is not configured yet.
+                Set <code>OPENROUTER_API_KEY</code> in <code>.env.local</code> to
+                receive recommendations.</p>
         {% endif %}
 
         {# data-turbo="false": Turbo rejects a 200 HTML response to a POST
@@ -19,7 +19,7 @@
            form out lets the browser navigate normally and render the result. #}
         <form method="post" action="{{ path('app_advisor_ask') }}" data-turbo="false">
             <p>
-                <label>Wofür interessierst du dich?<br>
+                <label>What are you interested in?<br>
                     <select name="category" required>
                         {% for category in categories %}
                             <option value="{{ category }}">{{ category }}</option>
@@ -29,20 +29,20 @@
             </p>
             <p>
                 <label>Budget (EUR, optional)<br>
-                    <input type="number" name="budget" min="0" step="10" placeholder="z. B. 300">
+                    <input type="number" name="budget" min="0" step="10" placeholder="e.g. 300">
                 </label>
             </p>
             <p>
-                <label>Erfahrung (optional)<br>
-                    <input type="text" name="experience" placeholder="z. B. kompletter Anfänger">
+                <label>Experience (optional)<br>
+                    <input type="text" name="experience" placeholder="e.g. complete beginner">
                 </label>
             </p>
             <p>
-                <label>Deine Frage<br>
-                    <textarea name="question" rows="3" cols="50" placeholder="Was brauche ich für den Einstieg?"></textarea>
+                <label>Your question<br>
+                    <textarea name="question" rows="3" cols="50" placeholder="What do I need to get started?"></textarea>
                 </label>
             </p>
-            <p><button type="submit">Beraten lassen</button></p>
+            <p><button type="submit">Get advice</button></p>
         </form>
     </div>
 {% endblock %}

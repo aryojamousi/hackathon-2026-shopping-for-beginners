@@ -1,20 +1,20 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Ratgeber & Guides{% endblock %}
+{% block title %}Advice & Guides{% endblock %}
 
 {% block body %}
     <div class="tm-content-placeholder">
-        <h1>Ratgeber & Guides</h1>
+        <h1>Advice & Guides</h1>
         <p>Buying guides and learn articles crawled from Thomann, served from the
             separate read-only SQLite connection.</p>
 
-        <h2>Kaufberatung (Online Expert)</h2>
+        <h2>Buying Advice (Online Expert)</h2>
         {% for category, guides in guidesByCategory %}
             <section>
                 <h3>
                     <a href="{{ path('app_guides_category', { category: category }) }}">{{ category }}</a>
                     {% if articleCounts[category] is defined %}
-                        <small>· {{ articleCounts[category] }} Learn-Artikel</small>
+                        <small>· {{ articleCounts[category] }} Learn articles</small>
                     {% endif %}
                 </h3>
                 <ul>
@@ -27,10 +27,10 @@
                 </ul>
             </section>
         {% else %}
-            <p>Keine Guides gefunden.</p>
+            <p>No guides found.</p>
         {% endfor %}
 
-        <h2>Neueste Learn-Artikel</h2>
+        <h2>Latest Learn Articles</h2>
         <ul>
             {% for article in latestArticles %}
                 <li>
@@ -38,7 +38,7 @@
                     <small>[{{ article.category }}]{% if article.readingTime %} · {{ article.readingTime }} min{% endif %}</small>
                 </li>
             {% else %}
-                <p>Keine Artikel gefunden.</p>
+                <p>No articles found.</p>
             {% endfor %}
         </ul>
     </div>

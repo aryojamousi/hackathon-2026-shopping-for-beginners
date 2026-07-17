@@ -473,3 +473,798 @@ ul {
         grid-template-columns: 1fr;
     }
 }
+
+/* ── Beginner questionnaire ─────────────────────────────────────── */
+.tm-quiz-wrap {
+    max-width: 640px;
+    margin: 48px auto;
+}
+
+.tm-quiz {
+    background: var(--tm-neutral-white);
+    border: 1px solid var(--tm-neutral-200);
+    border-radius: 12px;
+    padding: 32px;
+}
+
+.tm-quiz__progress {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--tm-neutral-200);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.tm-quiz__progress-bar {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--tm-primary-500);
+    transition: width 0.25s ease;
+}
+
+.tm-quiz__step {
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--tm-neutral-400);
+}
+
+.tm-quiz__crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 4px 0 24px;
+}
+
+.tm-quiz__crumb {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 14px;
+    color: var(--tm-neutral-700);
+    background: var(--tm-neutral-100);
+}
+
+.tm-quiz__crumb svg {
+    color: var(--tm-neutral-700);
+}
+
+.tm-quiz__question {
+    margin: 0 0 24px;
+    font-size: 24px;
+    line-height: 1.3;
+    color: var(--tm-neutral-700);
+}
+
+.tm-quiz__options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tm-quiz__option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 16px 18px;
+    font-size: 16px;
+    color: var(--tm-neutral-700);
+    background: var(--tm-neutral-white);
+    border: 1px solid var(--tm-neutral-300);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.tm-quiz__option:hover {
+    border-color: var(--tm-primary-500);
+    background: var(--tm-neutral-100);
+    color: var(--tm-primary-500);
+}
+
+.tm-quiz__option--selected,
+.tm-quiz__option--selected:hover {
+    border-color: var(--tm-primary-500);
+    background: rgba(126, 0, 243, 0.08);
+    color: var(--tm-primary-500);
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1px var(--tm-primary-500);
+}
+
+/* Step navigation (previous / next) */
+.tm-quiz__nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.tm-quiz__nav-btn {
+    padding: 14px 32px;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.tm-quiz__nav-btn--prev {
+    color: var(--tm-neutral-700);
+    background: var(--tm-neutral-100);
+}
+
+.tm-quiz__nav-btn--prev:hover:not(:disabled) {
+    background: var(--tm-neutral-200);
+}
+
+/* Matches the recommendation card button (.tm-rec-card__button) */
+.tm-quiz__nav-btn--next {
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--tm-neutral-white);
+    background: var(--tm-neutral-black);
+}
+
+.tm-quiz__nav-btn--next:hover:not(:disabled) {
+    background: var(--tm-primary-500);
+    color: var(--tm-neutral-white);
+}
+
+.tm-quiz__nav-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* Results screen (info box + product list) */
+.tm-quiz-results {
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 75vw;
+    max-width: none;
+    margin: 48px 0;
+}
+
+.tm-results-header {
+    margin-bottom: 32px;
+}
+
+.tm-results-header__title {
+    margin: 0 0 12px;
+    font-size: 44px;
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: center;
+    color: var(--tm-neutral-700);
+}
+
+.tm-results-header__text {
+    max-width: 900px;
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--tm-neutral-500);
+}
+
+.tm-results-summary {
+    align-items: center;
+    margin: 0 0 32px;
+}
+
+/* Lets the injected chips sit as direct flex items alongside the button */
+.tm-results-summary__chips {
+    display: contents;
+}
+
+/* Restart button — chip-shaped like the breadcrumbs, but keeps its purple color */
+.tm-quiz__restart {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--tm-neutral-white);
+    background: var(--tm-primary-500);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.tm-quiz__restart:hover {
+    background: var(--tm-primary-700);
+}
+
+/* ── Beginner recommendation cards ──────────────────────────────── */
+.tm-rec-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+@media (max-width: 860px) {
+    .tm-rec-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.tm-rec-card {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border: 1px solid var(--tm-neutral-200);
+    border-radius: 16px;
+    background: var(--tm-neutral-white);
+}
+
+.tm-rec-card__image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--tm-neutral-100);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.tm-rec-card__image img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.tm-rec-card__image-placeholder {
+    font-size: 14px;
+    color: var(--tm-neutral-400);
+}
+
+.tm-rec-card__badge {
+    align-self: flex-start;
+    padding: 6px 14px;
+    margin-bottom: 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--tm-neutral-600);
+    background: var(--tm-neutral-100);
+}
+
+.tm-rec-card__badge--highlight {
+    color: var(--tm-neutral-white);
+    background: var(--tm-primary-500);
+}
+
+.tm-rec-card__title {
+    margin: 0 0 10px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--tm-neutral-700);
+}
+
+/* Review stars */
+.tm-rec-card__reviews {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.tm-rec-card__stars {
+    display: inline-flex;
+    gap: 2px;
+    color: var(--tm-neutral-300);
+}
+
+.tm-rec-card__star--on {
+    color: #f6a821;
+}
+
+.tm-rec-card__review-count {
+    font-size: 13px;
+    color: var(--tm-neutral-400);
+}
+
+/* Action row: heart · price · cart */
+.tm-rec-card__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.tm-rec-card__fav,
+.tm-rec-card__cart {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border: none;
+    background: transparent;
+    color: var(--tm-neutral-700);
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.tm-rec-card__fav:hover,
+.tm-rec-card__cart:hover {
+    color: var(--tm-primary-500);
+}
+
+.tm-rec-card__price {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--tm-neutral-700);
+}
+
+/* Availability */
+.tm-rec-card__stock {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: auto 0 0;
+    padding-top: 4px;
+    font-size: 14px;
+}
+
+.tm-rec-card__stock-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: currentColor;
+}
+
+.tm-rec-card__stock--in {
+    color: #2f9e44;
+}
+
+.tm-rec-card__stock--soon {
+    color: #e8850c;
+}
+
+/* ── Accessories slider ─────────────────────────────────────────── */
+.tm-slider {
+    margin-top: 56px;
+}
+
+.tm-slider__heading {
+    margin: 0 0 20px;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--tm-neutral-700);
+    text-align: center;
+}
+
+.tm-slider__viewport {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tm-slider__track {
+    flex: 1 1 auto;
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    padding: 4px;
+}
+
+.tm-slider__track::-webkit-scrollbar {
+    display: none;
+}
+
+.tm-slider__arrow {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: 1px solid var(--tm-neutral-300);
+    background: var(--tm-neutral-white);
+    color: var(--tm-neutral-700);
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.tm-slider__arrow:hover {
+    border-color: var(--tm-primary-500);
+    color: var(--tm-primary-500);
+}
+
+/* Accessory card — smaller sibling of the recommendation card */
+.tm-acc-card {
+    flex: 0 0 calc((100% - 4 * 16px) / 5);
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    border: 1px solid var(--tm-neutral-200);
+    border-radius: 12px;
+    background: var(--tm-neutral-white);
+}
+
+.tm-acc-card__image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    margin-bottom: 14px;
+    padding: 10px;
+    background: var(--tm-neutral-100);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.tm-acc-card__image img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.tm-acc-card__image-placeholder {
+    font-size: 12px;
+    color: var(--tm-neutral-400);
+}
+
+.tm-acc-card__title {
+    margin: 0 0 14px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--tm-neutral-700);
+}
+
+.tm-acc-card__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.tm-acc-card__icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border: none;
+    background: transparent;
+    color: var(--tm-neutral-700);
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.tm-acc-card__icon:hover {
+    color: var(--tm-primary-500);
+}
+
+.tm-acc-card__price {
+    font-size: 15px;
+    color: var(--tm-neutral-500);
+}
+
+.tm-slider__dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.tm-slider__dot {
+    width: 10px;
+    height: 10px;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background: var(--tm-neutral-300);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.tm-slider__dot--active {
+    background: var(--tm-primary-500);
+}
+
+@media (max-width: 1100px) {
+    .tm-acc-card {
+        flex-basis: calc((100% - 2 * 16px) / 3);
+    }
+}
+
+@media (max-width: 700px) {
+    .tm-acc-card {
+        flex-basis: calc((100% - 16px) / 2);
+    }
+}
+
+/* ── Useful content list ────────────────────────────────────────── */
+.tm-useful {
+    margin-top: 56px;
+}
+
+.tm-useful__heading {
+    margin: 0 0 20px;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--tm-neutral-700);
+}
+
+.tm-useful__list {
+    border: 1px solid var(--tm-neutral-200);
+    border-radius: 16px;
+    padding: 8px 28px;
+}
+
+.tm-useful__row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--tm-neutral-200);
+    transition: opacity 0.15s ease;
+}
+
+.tm-useful__row:last-child {
+    border-bottom: none;
+}
+
+.tm-useful__row:hover {
+    opacity: 0.75;
+}
+
+.tm-useful__tag {
+    flex: 0 0 auto;
+    width: 110px;
+    text-align: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tm-primary-500);
+    background: rgba(126, 0, 243, 0.10);
+}
+
+.tm-useful__body {
+    flex: 1 1 auto;
+}
+
+.tm-useful__title {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--tm-neutral-700);
+}
+
+.tm-useful__text {
+    display: block;
+    font-size: 15px;
+    color: var(--tm-neutral-500);
+}
+
+.tm-useful__arrow {
+    flex: 0 0 auto;
+    display: inline-flex;
+    color: var(--tm-primary-500);
+}
+
+/* ── Talk to an expert ──────────────────────────────────────────── */
+.tm-expert {
+    margin-top: 48px;
+}
+
+.tm-expert__heading {
+    margin: 0 0 20px;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--tm-neutral-700);
+}
+
+.tm-expert__card {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 24px 32px;
+    border-radius: 16px;
+    background: rgba(126, 0, 243, 0.08);
+}
+
+.tm-expert__avatar {
+    flex: 0 0 auto;
+    width: 76px;
+    height: 76px;
+    border-radius: 999px;
+    background: var(--tm-neutral-200);
+}
+
+.tm-expert__info {
+    flex: 1 1 auto;
+}
+
+.tm-expert__name {
+    margin: 0 0 8px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--tm-neutral-700);
+}
+
+.tm-expert__contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    margin: 0 0 8px;
+    font-size: 15px;
+    color: var(--tm-neutral-500);
+}
+
+.tm-expert__contact-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tm-expert__hours {
+    margin: 0;
+    font-size: 14px;
+    color: var(--tm-neutral-500);
+}
+
+.tm-expert__button {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 28px;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--tm-neutral-white);
+    background: var(--tm-primary-500);
+    transition: background-color 0.15s ease;
+}
+
+.tm-expert__button:hover {
+    background: var(--tm-primary-700);
+    color: var(--tm-neutral-white);
+}
+
+@media (max-width: 760px) {
+    .tm-expert__card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* ── "Why this?" button + dialog ────────────────────────────────── */
+.tm-rec-card__why {
+    margin-top: 16px;
+}
+
+.tm-why-btn {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--tm-neutral-700);
+    background: var(--tm-neutral-100);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.tm-why-btn:hover {
+    background: var(--tm-neutral-200);
+}
+
+.tm-why-dialog {
+    position: relative;
+    width: 90vw;
+    max-width: 640px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 32px;
+    border: none;
+    border-radius: 16px;
+    color: var(--tm-neutral-700);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+}
+
+.tm-why-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.tm-why-dialog__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border: none;
+    background: transparent;
+    color: var(--tm-neutral-500);
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.tm-why-dialog__close:hover {
+    color: var(--tm-neutral-700);
+}
+
+.tm-why-dialog__content {
+    margin-top: 12px;
+    padding-right: 24px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--tm-neutral-700);
+}
+
+.tm-why-dialog__content > p {
+    margin: 0;
+}
+
+.tm-why-set__heading {
+    margin: 24px 0 12px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--tm-neutral-700);
+}
+
+.tm-why-set {
+    padding: 20px 24px;
+    border-radius: 14px;
+    background: rgba(126, 0, 243, 0.08);
+}
+
+.tm-why-set__intro {
+    margin: 0 0 12px;
+    line-height: 1.6;
+}
+
+.tm-why-set__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tm-why-set__list li {
+    position: relative;
+    padding-left: 20px;
+    line-height: 1.5;
+}
+
+.tm-why-set__list li::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 8px;
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--tm-primary-500);
+}
