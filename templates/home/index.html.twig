@@ -8,6 +8,51 @@
 
 {% block body %}
     <div class="tm-content-placeholder">
-        {# Intentionally empty — this is the canvas for the prototype journey. #}
+        <h1 class="tm-home__welcome">Welcome to Thomann, {{ userName }}! 👋</h1>
+
+        {# Hero banner carousel #}
+        <div class="tm-hero" data-controller="hero-slider">
+            <button type="button" class="tm-hero__arrow tm-hero__arrow--prev"
+                    data-action="hero-slider#prev" aria-label="Previous">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+
+            <div class="tm-hero__track" data-hero-slider-target="track">
+                <a href="#" class="tm-hero__slide tm-hero__slide--drums">
+                    <span class="tm-hero__eyebrow">Stage &amp; Live</span>
+                    <span class="tm-hero__title">PA &amp; Drums</span>
+                </a>
+                <a href="#" class="tm-hero__slide tm-hero__slide--guitars">
+                    <span class="tm-hero__brand">Harley Benton</span>
+                    <span class="tm-hero__subtitle">Electric Guitars</span>
+                    <span class="tm-hero__price"><small>from</small> 89 €</span>
+                </a>
+                <a href="#" class="tm-hero__slide tm-hero__slide--keys">
+                    <span class="tm-hero__title">Controller Keyboards</span>
+                </a>
+            </div>
+
+            <button type="button" class="tm-hero__arrow tm-hero__arrow--next"
+                    data-action="hero-slider#next" aria-label="Next">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+        </div>
+
+        {# Category grid #}
+        <section class="tm-cats">
+            <h2 class="tm-cats__heading">Our categories</h2>
+            <div class="tm-cats__grid">
+                {% for cat in categories %}
+                    <a href="#" class="tm-cats__item">
+                        <span class="tm-cats__icon" aria-hidden="true">{{ cat.icon }}</span>
+                        <span class="tm-cats__label">{{ cat.label }}</span>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
     </div>
 {% endblock %}
