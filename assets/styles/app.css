@@ -1,3 +1,40 @@
+/* Open Sans — the font used on thomann.de (self-hosted, files in public/fonts). */
+@font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('/fonts/open-sans/open-sans-v43-greek_latin_latin-ext-300.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/open-sans/open-sans-v43-greek_latin_latin-ext-regular.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('/fonts/open-sans/open-sans-v43-greek_latin_latin-ext-600.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/fonts/open-sans/open-sans-v43-greek_latin_latin-ext-700.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Open Sans';
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/open-sans/open-sans-v43-greek_latin_latin-ext-italic.woff2') format('woff2');
+}
+
 /* Design tokens sampled from thomann.de's own stylesheet (fx-color--*) */
 :root {
     --tm-primary-100: #cc8aff;
@@ -21,6 +58,8 @@
 
     --tm-hot: #f00039;
     --tm-price-highlight: #c21025;
+
+    --tm-font: 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 * {
@@ -29,7 +68,7 @@
 
 body {
     margin: 0;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: var(--tm-font);
     color: var(--tm-neutral-700);
     background-color: var(--tm-neutral-white);
 }
